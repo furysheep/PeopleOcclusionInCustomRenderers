@@ -17,6 +17,7 @@ class ViewController: UIViewController, MTKViewDelegate, ARSessionDelegate {
     
     var session: ARSession!
     var renderer: Renderer!
+    @IBOutlet weak var metalView: MTKView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,21 +27,20 @@ class ViewController: UIViewController, MTKViewDelegate, ARSessionDelegate {
         session.delegate = self
         
         // Set the view to use the default device
-        if let view = self.view as? MTKView {
-            view.device = MTLCreateSystemDefaultDevice()
-            view.backgroundColor = UIColor.clear
-            view.delegate = self
+        metalView.device = MTLCreateSystemDefaultDevice()
+//        metalView.backgroundColor = UIColor.clear
+        metalView.delegate = self
+        metalView.layer.isOpaque = false
             
-            guard view.device != nil else {
+            guard metalView.device != nil else {
                 print("Metal is not supported on this device")
                 return
             }
             
             // Configure the renderer to draw to the view
-            renderer = Renderer(session: session, metalDevice: view.device!, renderDestination: view)
+            renderer = Renderer(session: session, metalDevice: metalView.device!, renderDestination: metalView)
             
             renderer.drawRectResized(size: view.bounds.size)
-        }
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(ViewController.handleTap(gestureRecognize:)))
         view.addGestureRecognizer(tapGesture)
@@ -50,11 +50,11 @@ class ViewController: UIViewController, MTKViewDelegate, ARSessionDelegate {
         super.viewWillAppear(animated)
         
         // Create a session configuration
-        let configuration = ARWorldTrackingConfiguration()
+        let configuration = ARFaceTrackingConfiguration()
 
         // Enable frame semantics
         // .personSegmentation or .personSegmentationWithDepth
-        configuration.frameSemantics = .personSegmentationWithDepth
+        configuration.frameSemantics = .personSegmentation
 
         // Run the view's session
         session.run(configuration)
@@ -70,17 +70,17 @@ class ViewController: UIViewController, MTKViewDelegate, ARSessionDelegate {
     @objc
     func handleTap(gestureRecognize: UITapGestureRecognizer) {
         // Create anchor using the camera's current position
-        if let currentFrame = session.currentFrame {
-            
-            // Create a transform with a translation of 1.0 meters in front of the camera
-            var translation = matrix_identity_float4x4
-            translation.columns.3.z = -1.0
-            let transform = simd_mul(currentFrame.camera.transform, translation)
-            
-            // Add a new anchor to the session
-            let anchor = ARAnchor(transform: transform)
-            session.add(anchor: anchor)
-        }
+//        if let currentFrame = session.currentFrame {
+//            
+//            // Create a transform with a translation of 1.0 meters in front of the camera
+//            var translation = matrix_identity_float4x4
+//            translation.columns.3.z = -1.0
+//            let transform = simd_mul(currentFrame.camera.transform, translation)
+//            
+//            // Add a new anchor to the session
+//            let anchor = ARAnchor(transform: transform)
+//            session.add(anchor: anchor)
+//        }
     }
     
     // MARK: - MTKViewDelegate
